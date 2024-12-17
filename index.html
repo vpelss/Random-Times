@@ -1,0 +1,327 @@
+
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  
+  
+  
+
+  <title>Random Times</title>
+
+    <link rel="canonical" href="https://codepen.io/vpelss/pen/qEWdEem">
+  
+  
+  
+  
+<style>
+body{
+  font-family: "courier" 
+}
+</style>
+
+  
+  
+  
+</head>
+
+<body>
+  <!--
+https://www.wolframscience.com/nks/p319--the-intrinsic-generation-of-randomness/
+
+Kolmogorov's definition of a random string was that it is random if it has no description shorter than itself via a universal Turing machine
+
+The sub-sequence selection criterion imposed by von Mises is important, because although 0101010101... is not biased, by selecting the odd positions, we get 000000... which is not random
+
+The dual concept of randomness is compressibility ‒ the more random a sequence is, the less compressible, and vice versa.
+
+0000... or 011010... has equal probability of exactly zero
+andy infinte series of 1 and 0 also has probability of zero, but exists, no?
+
+random sequences should be incompressible, they should pass statistical tests for randomness, and it should be difficult to make money betting on them
+
+Stated in another way, each infinite binary string is a coin-flip game, and an admissible rule is a way for a gambler to decide when to place bets. A collective is a coin-flip game where there is no way for one gambler to do better than another over the long run. That is, there is no gambling system that works for the game.
+
+-------------------
+
+multiply a number repeatedly by 3, 5 , 37 , 65539 , keep 31 rightmost digits
+repetition period?
+
+https://en.wikipedia.org/wiki/Cellular_automaton
+
+https://mzsoltmolnar.github.io/random-bitstream-tester/
+https://gchq.github.io/CyberChef/#recipe=From_Binary('Space',8)Entropy('Shannon%20scale')&ieol=CRLF&oeol=VT
+
+//calc max period
+//calc ratio of characters
+//shannon entropy
+//repeat sequences
+
+// (2 x v) ^ (3 x v)
+
+//shift xor
+
+other ideas:
+multiply my sequesce of primes?
+powers of?
+encryption
+strange loops?
+chaos theory 
+butterfly effect
+strange attractor
+3 body problem
+
+function(){
+#run for time less than period 
+reseed with time or another number that mixes up next run?
+}
+
+quasirandom  sequence
+Monte Carlo Value for Pi using ann array of points???
+
+array of evenly spaced points and a random walk among them?
+
+-->
+
+<p><a href="https://www.wolframscience.com/nks/p319--the-intrinsic-generation-of-randomness/" target="blank">https://www.wolframscience.com/nks/p319--the-intrinsic-generation-of-randomness/</a></p>
+<p>Test here with 1,000,000 digits:</p>
+<p><a href="https://gchq.github.io/CyberChef/#recipe=Remove_whitespace(true,true,true,true,true,false)From_Binary('Space',8)Entropy('Shannon%20scale')&ieol=CRLF&oeol=FF" target="blank">https://gchq.github.io/CyberChef/#recipe=Remove_whitespace(true,true,true,true,true,false)From_Binary('Space',8)Entropy('Shannon%20scale')&ieol=CRLF&oeol=FF</a></p>
+<a href="https://mzsoltmolnar.github.io/random-bitstream-tester/" target="blank">https://mzsoltmolnar.github.io/random-bitstream-tester/</a></p>
+
+<p>
+  Show <input type="radio" id="show" name="show" value="show" checked>
+  Hide <input type="radio" name="show" value="hide">
+</p>
+<p>
+  Display <input type="radio" id="display" name="display" value="display" checked>
+  Inline <input type="radio" name="display" value="inline">
+</p>
+<p>
+  How many digits <input id="how_many" type="number" value="1000">
+</p>
+<p>
+  Width (binary)<input id="width" type="number" value="31">
+</p>
+<p>
+  Seed <input id="seed" type="number" value="3">
+</p>
+<p>
+  Multiplier <input id="multiplier" type="number" value="37">
+</p>
+
+<p>
+  <input id="gogogo" type="button" value="Go Go Go">
+  <button onclick="copyContent()">Copy To Clipboard</button>
+</p>
+
+<div id='message'>
+</div>
+<div id='output'>
+</div>
+
+<script id="webworker" _type="javascript/worker">
+  onmessage = function(event) {
+    var input = event.data;
+    Start_Worker(input);
+  };
+  let display;
+
+  function Start_Worker(input) {
+    //seed , multiplier , length
+    let op = "";
+    display = input.display;
+    let how_many = input.how_many;
+    let seed = input.seed;
+    let width = input.width;
+    let multiplier = input.multiplier;
+    random_times(seed, multiplier, width);
+    while (op.length < how_many) {
+      if (display) {
+        op = op + "<br>" + random_times(); //test display
+      } else {
+        op = op + random_times(); //string
+      }
+    }
+    op = op.slice(0, how_many);
+    postMessage(op);
+  }
+  //rough random based on simple multiplication
+  var random_times = (function() {
+    //seed,multiplier,width
+    //persistant states
+    let state;
+    let multiplier;
+    let length;
+    let width;
+    let rot = 0n;
+    let prime_array = [37];
+    let last_state = 0n;
+    return function(seed, mult, wid) {
+      //initialization
+      seed ? (state = BigInt(seed)) : null;
+      mult ? (multiplier = BigInt(mult)) : null;
+      wid ? (width = wid) : null;
+      if (
+        typeof seed == "undefined" &&
+        typeof mult == "undefined" &&
+        typeof wid == "undefined"
+      ) { //get next random number
+        let bin_text;
+        state = state * BigInt(multiplier);
+        let mask = (2n ** BigInt(width)) - 1n;
+        state = state & mask; //limit state to bit width
+        let state2 = ror(state, width);
+        //state2 = reverseBits(state2, width);
+        state = state ^ state2;
+        //state = state ^ last_state;
+        //last_state = state;
+        result = state.toString(2).padStart(width, '0'); //bin
+        //result = state.toString(); //dec
+        return result;
+      } else { //reset
+        last_state = 0n;
+      }
+    };
+  })();
+
+  function reverseBits(n, width) { // function to reverse bits of a number
+    let rev = 0n;
+    //while (n > 0n) { // traversing bits of 'n'  from the right
+    for (let a = width; a > 0; a--) { // traversing bits of 'n'  from the right
+      rev <<= 1n; // bitwise left shift 'rev' by 1
+      if ((n & 1n) == 1n) // if rightmost bit is '1'
+        rev ^= 1n; //set rightmost bit of rev
+      n >>= 1n; // bitwise right shift 'n' by 1
+    }
+    return rev; // reversed number
+  }
+
+  function ror(n, width) {
+    let bit = n & 1n;
+    n >>= 1n; //rotate
+    if (bit == 1n) { //stick it on the end
+      n = n | (2n ** BigInt(width - 1));
+    }
+    return n;
+  }
+  /*
+    function rotate_string(str, count) { //plus right , minus left (not implimented)
+      var temp = str + str;
+      var l1 = str.length;
+      var Lfirst = temp.substr(str.length - count, l1);
+      //     now returning string
+      return Lfirst;
+    }
+
+    function reverse_string(str) {
+      return str.split('').reverse().join('');
+    }
+    */
+  /*
+       let bit = width;
+       let max = BigInt(2 ** bit);
+       let over_width = width;
+       while (state >= max) {
+         state = state ^ max; //remove this bit
+         bit++;
+         max = BigInt(2 ** bit);
+       }
+       */
+  /*
+        //limit op width of binary and left pad zeros
+        bin_text = state.toString(2);
+        if (bin_text.length > width) {
+          bin_text = bin_text.slice(-width);
+        } else {
+          bin_text = bin_text.padStart(width, '0');
+        }
+        */
+</script>
+  
+      <script id="rendered-js" >
+let goGoGo_button = document.getElementById("gogogo");
+goGoGo_button.onclick = goGoGo;
+let show = true;
+
+function goGoGo() {
+  show = false;
+  if(document.getElementById("show").checked){show = true;}
+  line_count = 0;
+  bigString = "";
+  document.getElementById("message").innerHTML = "Please wait for completion";
+  document.getElementById("output").innerHTML = "";
+
+  webworker.postMessage({
+    "display":document.getElementById("display").checked,
+    "seed": document.getElementById("seed").value,
+    "how_many": document.getElementById("how_many").value,
+    "width": document.getElementById("width").value,
+    "multiplier": document.getElementById("multiplier").value
+  });
+}
+
+//get inline webworker code.
+var inline_webworker_blob = new Blob(
+  [document.querySelector("#webworker").textContent],
+  { type: "text/javascript" }
+);
+let webworker = new Worker(window.URL.createObjectURL(inline_webworker_blob));
+
+let bigString = "";
+let line_count = 0;
+//messages from webworker
+webworker.onmessage = function (event) {
+  let op = event.data;
+  if (typeof op == "undefined") return false;
+  bigString = bigString + op;
+  document.getElementById("message").innerHTML = "Output ready.";
+  if (show) {
+    document.getElementById("output").innerHTML = bigString;
+  }
+};
+
+const copyContent = async () => {
+  try {
+    if (bigString == "") {
+      bigString = "failed";
+    }
+    await navigator.clipboard.writeText(bigString);
+    alert("Content copied to clipboard");
+    console.log("Content copied to clipboard");
+  } catch (err) {
+    console.error("Failed to copy: ", err);
+  }
+};
+
+//test display
+document.getElementById("message").innerHTML = "Test ouput below. <br>";
+//hh = document.getElementById("display").checked;
+webworker.postMessage({
+   "display": document.getElementById("display").checked,
+    "seed": document.getElementById("seed").value,
+    "how_many": document.getElementById("how_many").value,
+    "width": document.getElementById("width").value,
+    "multiplier": document.getElementById("multiplier").value
+});
+
+function decimalToBinary(N) {
+  let oldn = N;
+  N = Number(N);
+  if (N < 0) {
+    h = 9;
+  }
+  if (N === 0) return "0";
+  let binaryArray = [];
+  while (N > 0) {
+    binaryArray.push(N & 1);
+    N = N >> 1;
+  }
+  return binaryArray.reverse().join("");
+}
+    </script>
+
+  
+</body>
+
+</html>
