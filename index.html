@@ -81,7 +81,9 @@ strange attractor
 -->
 
 <p><a href="https://www.wolframscience.com/nks/p319--the-intrinsic-generation-of-randomness/" target="blank">https://www.wolframscience.com/nks/p319--the-intrinsic-generation-of-randomness/</a></p>
-<p>Test here with 1,000,000 digits:</p>
+<p><a href="https://en.wikipedia.org/wiki/Linear_congruential_generator" target="blank">https://en.wikipedia.org/wiki/Linear_congruential_generator</a></p>
+
+<p>Test here with 1,000,000 digits and inline:</p>
 <p><a href="https://gchq.github.io/CyberChef/#recipe=Remove_whitespace(true,true,true,true,true,false)From_Binary('Space',8)Entropy('Shannon%20scale')&ieol=CRLF&oeol=FF" target="blank">https://gchq.github.io/CyberChef/#recipe=Remove_whitespace(true,true,true,true,true,false)From_Binary('Space',8)Entropy('Shannon%20scale')&ieol=CRLF&oeol=FF</a></p>
 <a href="https://mzsoltmolnar.github.io/random-bitstream-tester/" target="blank">https://mzsoltmolnar.github.io/random-bitstream-tester/</a></p>
 
@@ -104,7 +106,7 @@ strange attractor
   Width (binary) <input id="width" type="number" value="31">
 </p>
 <p>
-  Seed (start value) <input id="seed" type="number" value="3">
+  Seed (start value) <input id="seed" type="number" value="48271">
 </p>
 <p>
   Modulus <input id="mod" type="number" value="2147483647">
@@ -137,7 +139,7 @@ strange attractor
   function Start_Worker(input) {
     //seed , multiplier , length
     let op = "";
-    let mod = input.mod; 
+    let mod = input.mod;
     let increment = input.increment;
     binary = input.binary;
     display = input.display;
@@ -169,7 +171,7 @@ strange attractor
     let rot = 0n;
     let prime_array = [37];
     let last_state = 0n;
-    return function(seed, mult, mod , inc ,wid) {
+    return function(seed, mult, mod, inc, wid) {
       //initialization
       seed ? (state = BigInt(seed)) : null;
       mult ? (multiplier = BigInt(mult)) : null;
@@ -298,7 +300,9 @@ function goGoGo() {
     seed: document.getElementById("seed").value,
     how_many: document.getElementById("how_many").value,
     width: document.getElementById("width").value,
-    multiplier: document.getElementById("multiplier").value
+    multiplier: document.getElementById("multiplier").value,
+       increment: document.getElementById("increment").value,
+   mod: document.getElementById("mod").value
   });
 }
 
