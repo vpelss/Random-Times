@@ -185,10 +185,10 @@ strange attractor
         typeof inc == "undefined" &&
         typeof wid == "undefined"
       ) { //get next random number
-        //let bin_text;
         state = state * BigInt(multiplier) % modulus + increment;
         let mask = (2n ** BigInt(width)) - 1n;
         state = state & mask; //limit state to bit width
+        //state = state ^ rol(state, width);
         //state++;
         //let state2 = ror(state, width);
         //state2 = reverseBits(state2, width);
@@ -222,10 +222,26 @@ strange attractor
   }
 
   function ror(n, width) {
-    let bit = n & 1n;
+    let bit = 0;
+    if (n & 1n) {
+      bit = 1;
+    }
     n >>= 1n; //rotate
     if (bit == 1n) { //stick it on the end
       n = n | (2n ** BigInt(width - 1));
+    }
+    return n;
+  }
+
+  function rol(n, width) {
+    let bit = 0;
+    if (n & (2n ** BigInt(width - 1))) {
+      bit = 1;
+    }
+    n = n & ((2n ** BigInt(width - 1)) - 1n);  //remove leftmost bit
+    n <<= 1n; //rotate
+    if (bit == 1n) {
+      n = n | 1n; //stick it on the end
     }
     return n;
   }
